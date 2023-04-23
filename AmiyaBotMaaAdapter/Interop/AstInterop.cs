@@ -48,13 +48,13 @@ namespace AmiyaBotMaaAdapter.Interop
         public static extern byte AsstSetTaskParams(IntPtr handle, int id, string parameters);
 
         [DllImport(AsstPortDll)]
-        public static extern byte AsstStart(IntPtr handle);
+        public static extern bool AsstStart(IntPtr handle);
 
         [DllImport(AsstPortDll)]
         public static extern byte AsstStop(IntPtr handle);
 
         [DllImport(AsstPortDll)]
-        public static extern byte AsstRunning(IntPtr handle);
+        public static extern bool AsstRunning(IntPtr handle);
 
         [DllImport(AsstPortDll)]
         public static extern byte AsstConnected(IntPtr handle);

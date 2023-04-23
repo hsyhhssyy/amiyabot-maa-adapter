@@ -12,7 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AmiyaBotMaaAdapter.Helpers;
 using AmiyaBotMaaAdapter.Interop;
+using Newtonsoft.Json;
 
 namespace AmiyaBotMaaAdapter
 {
@@ -26,26 +28,65 @@ namespace AmiyaBotMaaAdapter
             InitializeComponent();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
-            //AstInterop.AsstSetUserDir("")
-            AsstInterop.AsstLoadResource("E:\\Tools\\MAA");
-            //var handle = AstInterop.AsstCreateEx(callback, IntPtr.Zero);
-            var handle = AsstInterop.AsstCreate();
-            AsstInterop.AsstSetInstanceOption(handle, (int)InstanceOptionType.touch_type, "adb");
-            var success =
-                AsstInterop.AsstConnect(handle, "E:\\LeiDian\\LDPlayer9\\adb.exe", "emulator-5556", "LDPlayer");
-            if (success)
-            {
-                AsstInterop.AsstAppendTask(handle, "Fight", "{\"stage\": \"1-7\"}");
-                AsstInterop.AsstStart(handle);
-            }
+            Logger.Current.OnLog += CurrentLogger_OnLog;
 
+            txtServer.Text = MaaAdapter.CurrentAdapter.Server;
+            dynamic newData = new
+            {
+                signature = MaaAdapter.CurrentAdapter.Signature,
+            };
+
+            txtSignature.Text = JsonConvert.SerializeObject(newData, new JsonSerializerSettings
+            {
+                Formatting = Formatting.None
+            });
+            
+            MaaAdapter.CurrentAdapter.StartListen();
+        }
+
+        private void CurrentLogger_OnLog(object sender, Logger.OnLogEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                txtLogs.Text += $"[{e.DateTime:s}][{e.Level,-10}]{e.Message}" + Environment.NewLine;
+            });
         }
 
         private void callback(int msg, string details_json, IntPtr custom_arg)
         {
             
         }
+
+        private void BtnGenerateSignature_Click(object sender, RoutedEventArgs e)
+        {
+            var signature = MaaAdapter.CurrentAdapter.GenerateSignature();
+
+            if (signature == null)
+            {
+                txtSignature.Text = "";
+                return;
+            }
+
+            dynamic newData = new
+            {
+                signature = signature
+            };
+
+            txtSignature.Text = JsonConvert.SerializeObject(newData, new JsonSerializerSettings
+            {
+                Formatting = Formatting.None
+            });
+
+            MaaAdapter.CurrentAdapter.StartListen();
+        }
+
+        private void TxtServer_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            MaaAdapter.CurrentAdapter.Server = txtServer.Text;
+        }
+
+
     }
 }

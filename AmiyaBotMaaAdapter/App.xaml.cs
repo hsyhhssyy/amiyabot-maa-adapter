@@ -13,5 +13,9 @@ namespace AmiyaBotMaaAdapter
     /// </summary>
     public partial class App : Application
     {
+        private void App_OnStartup(object sender, StartupEventArgs e)
+        {
+            MaaAdapter.CurrentAdapter.Load();
+        }
     }
 }

@@ -3,13 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AmiyaBotMaaAdapter"
         mc:Ignorable="d"
+        Loaded="MainWindow_OnLoaded"
         Title="MainWindow" Height="450" Width="800">
     <Window.Resources>
         <Style TargetType="GroupBox" x:Key="GroupBoxMargin">
             <Setter Property="Margin" Value="5"/>
-            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontSize" Value="14"/>
         </Style>
     </Window.Resources>
     <Grid>
@@ -20,8 +20,8 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
-        <Button Content="Button" HorizontalAlignment="Left" Height="107" Margin="177,134,0,0" VerticalAlignment="Top" Width="196" Click="Button_Click" Grid.Column="1" Grid.Row="1"/>
         <GroupBox Grid.Row="0" Grid.Column="0" Header="第一步：" Style="{StaticResource GroupBoxMargin}">
             <Grid>
                 <Grid.RowDefinitions>
@@ -41,7 +41,7 @@
                     <RowDefinition Height="29*"/>
                 </Grid.RowDefinitions>
                 <TextBlock Text="联系兔兔的管理员，管他要连接地址，填到下面的文本框里，或者如果管理员配置了兔兔，在群聊中说“兔兔查看MAA连接地址”也可以。" TextWrapping="Wrap"/>
-                <TextBox Grid.Row="1" Margin="10,5,10,5"/>
+                <TextBox Name="txtServer" TextChanged="TxtServer_TextChanged" Grid.Row="1" Margin="10,5,10,5"/>
             </Grid>
         </GroupBox>
         <GroupBox Grid.Row="1" Grid.Column="0" Header="第三步：" Style="{StaticResource GroupBoxMargin}">
@@ -55,8 +55,8 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="按下生成密钥按钮，然后复制下面文本框里的密钥，然后到群里，说“兔兔记录MAA密钥&lt;密钥内容&gt;”让兔兔记住密钥。不必担心其他人看到密钥，他们就算复制了这个密钥也没用。" TextWrapping="Wrap" Grid.ColumnSpan="2" Margin="0,0,0,0"/>
-                <TextBox Grid.Row="1" Grid.Column="0" Margin="10,5,5,5" FontSize="12"/>
-                <Button Grid.Row="1" Grid.Column="1" Margin="5,5,10,5" Content="生成密钥"/>
+                <TextBox Name="txtSignature" Grid.Row="1" Grid.Column="0" Margin="10,5,5,5" TextWrapping="Wrap" IsReadOnly="True"/>
+                <Button Grid.Row="1" Grid.Column="1" Margin="5,5,10,5" Content="生成密钥" Click="BtnGenerateSignature_Click"/>
             </Grid>
         </GroupBox>
         <GroupBox Grid.Row="1" Grid.Column="1" Header="第四步：" Style="{StaticResource GroupBoxMargin}">
@@ -67,6 +67,9 @@
                 </Grid.RowDefinitions>
                 <TextBlock Text="接下来就是挂机，然后去群聊里和兔兔聊天吧。记得停止MAA的任务，本程序不能和MAA同时开启并控制同一个模拟器。如果你更换了兔兔链接地址，记得重新生成密钥并发给兔兔。" TextWrapping="Wrap"/>
             </Grid>
+        </GroupBox>
+        <GroupBox Grid.Row="0" Grid.Column="2" Header="运行日志" Grid.RowSpan="2" Style="{StaticResource GroupBoxMargin}">
+            <TextBox Name="txtLogs" TextWrapping="Wrap" AcceptsReturn="True" IsReadOnly="True" FontSize="12" />
         </GroupBox>
     </Grid>
 </Window>
