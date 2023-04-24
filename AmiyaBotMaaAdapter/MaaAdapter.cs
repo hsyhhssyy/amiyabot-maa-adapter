@@ -7,8 +7,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using static AmiyaBotMaaAdapter.Interop.AsstInterop;
 
 namespace AmiyaBotMaaAdapter
 {
@@ -22,6 +24,9 @@ namespace AmiyaBotMaaAdapter
         }
 
         public static MaaAdapter CurrentAdapter { get; set; } = new MaaAdapter();
+        private static AsstInterop.AsstApiCallback asstCallback = new AsstInterop.AsstApiCallback(Asst_OnCallback);
+        private static int AsstLastCallback = 0 ;
+
         public string Server
         {
             get => _server;
@@ -38,8 +43,20 @@ namespace AmiyaBotMaaAdapter
             set => _signature = value;
         }
 
+        public string Resources
+        {
+            get => _resources;
+            set
+            {
+                if (_resources == value) return;
+                _resources = value;
+                SaveConfig();
+            }
+        }
+
         private const string FilePath = "secret.json";
 
+        private string _resources;
         private string _uuid;
         private string _secret;
         private string _maa;
@@ -91,6 +108,11 @@ namespace AmiyaBotMaaAdapter
                         {
                             _signature = (string)data["signature"];
                         }
+
+                        if (data.ContainsKey("resources"))
+                        {
+                            _resources = (string)data["resources"];
+                        }
                     }
                 }
                 catch (Exception e)
@@ -129,7 +151,8 @@ namespace AmiyaBotMaaAdapter
                 secret = _secret,
                 maa = _maa,
                 server = _server,
-                signature = _signature
+                signature = _signature,
+                resources = _resources,
             };
 
             string newJson = JsonConvert.SerializeObject(newData);
@@ -172,21 +195,37 @@ namespace AmiyaBotMaaAdapter
             Task.Run(() =>
             {
 
+                if (string.IsNullOrWhiteSpace(_resources))
+                {
+                    return;
+                }
+
                 Logger.Current.Info("正在连接模拟器.....");
 
-                //AstInterop.AsstSetUserDir("")
-                AsstInterop.AsstLoadResource("E:\\Tools\\MAA");
-                //var handle = AstInterop.AsstCreateEx(callback, IntPtr.Zero);
-                _handle = AsstInterop.AsstCreate();
+                //打开Gui.json
+                var guiPath = Path.Combine(_resources, "config/gui.json");
 
-                AsstInterop.AsstSetInstanceOption(_handle, (int)InstanceOptionType.touch_type, "adb");
+                var guiJson = JsonConvert.DeserializeObject<Dictionary<String, object>>(File.ReadAllText(guiPath));
+
+
+                //AstInterop.AsstSetUserDir("")
+                AsstInterop.AsstLoadResource(_resources);
+                _handle = AsstInterop.AsstCreateEx(asstCallback, IntPtr.Zero);
+                //_handle = AsstInterop.AsstCreate();
+
+                AsstInterop.AsstSetInstanceOption(_handle, (int)InstanceOptionType.touch_type,
+                    guiJson["Connect.TouchMode"]?.ToString());
 
                 var success =
-                    AsstInterop.AsstConnect(_handle, "E:\\LeiDian\\LDPlayer9\\adb.exe", "emulator-5556", "LDPlayer");
+                    AsstInterop.AsstConnect(_handle, guiJson["Connect.AdbPath"]?.ToString(),
+                        guiJson["Connect.Address"]?.ToString(), guiJson["Connect.ConnectConfig"]?.ToString());
 
                 if (success)
                 {
                     Logger.Current.Info("模拟器连接成功。");
+
+                    UploadGuiJson();
+
                     _listening = true;
                 }
                 else
@@ -196,6 +235,28 @@ namespace AmiyaBotMaaAdapter
             });
         }
 
+        private void UploadGuiJson()
+        {
+            var guiPath = Path.Combine(_resources, "config/gui.json");
+
+            var error = GetResponseData(HttpHelper.PostAction(_server + "/maa/guiJson", JsonConvert.SerializeObject(new Dictionary<string, string>()
+            {
+                { "uuid", _uuid },
+                { "signature", _signature  },
+                { "gui_json", File.ReadAllText(guiPath) }
+            })), out var getTaskResponse);
+
+            if (error != null)
+            {
+                Logger.Current.Report("上传GuiJson发生错误:" + error);
+            }
+        }
+
+        private static void Asst_OnCallback(int msg, string detailsJson, IntPtr customArg)
+        {
+            AsstLastCallback = msg;
+        }
+        
         private void EnumratorWorker()
         {
             while (true)
@@ -210,19 +271,44 @@ namespace AmiyaBotMaaAdapter
                 if (_taskQueue.TryDequeue(out item))
                 {
                     bool executeSuccess = false;
+                    String payload = "";
                     try
                     {
-                        // 执行某个操作
-                        AsstInterop.AsstAppendTask(_handle, item.Type, item.Parameter);
-                        bool success = AsstInterop.AsstStart(_handle);
-                        Logger.Current.Info($"开始执行任务{item.Type}({item.Uuid})。");
-                        while (AsstInterop.AsstRunning(_handle))
+                        switch (item.Type)
                         {
-                            Thread.Sleep(1000);
-                        }
+                            case "CaptureImage":
+                            {
+                                ulong buffSize = 1024 * 1024 * 50;
+                                IntPtr buff = Marshal.AllocHGlobal((int)buffSize);
+                                var actualSize = AsstInterop.AsstGetImage(_handle, buff, buffSize);
 
-                        executeSuccess = true;
-                        Logger.Current.Info($"任务{item.Uuid}执行成功。");
+                                var managedBuff = new byte[actualSize];
+                                Marshal.Copy(buff,managedBuff,0,(int)actualSize);
+                                Marshal.FreeHGlobal(buff);
+
+                                payload = Convert.ToBase64String(managedBuff);
+                                
+                                break;
+                            }
+                            default:
+                                // 执行某个操作
+                                AsstInterop.AsstAppendTask(_handle, item.Type, item.Parameter);
+                                Logger.Current.Info($"开始执行任务{item.Type}({item.Uuid})。");
+                                AsstInterop.AsstStart(_handle);
+                                while (AsstInterop.AsstRunning(_handle)!=0
+                                       && (AsstLastCallback!= 10002 && AsstLastCallback!=3))
+                                {
+                                    Thread.Sleep(1000);
+                                }
+
+                                if (AsstInterop.AsstRunning(_handle) != 0)
+                                {
+                                    AsstInterop.AsstStop(_handle);
+                                }
+                                executeSuccess = true;
+                                Logger.Current.Report("任务执行成功");
+                                break;
+                        }
                     }
                     catch (Exception exp)
                     {
@@ -231,6 +317,19 @@ namespace AmiyaBotMaaAdapter
                     finally
                     {
                         //汇报任务进度
+                        var error = GetResponseData(HttpHelper.PostAction(_server + "/maa/reportStatus", JsonConvert.SerializeObject(new Dictionary<string, string>()
+                        {
+                            { "uuid", _uuid },
+                            { "signature", _signature  },
+                            { "status", executeSuccess?"COMPLETE":"FAIL"  },
+                            { "task", item.Uuid  },
+                            { "payload", payload  },
+                        })), out var getTaskResponse);
+
+                        if (error != null)
+                        {
+                            Logger.Current.Report("汇报结果时发生错误:" + error);
+                        }
                     }
                 }
             }
@@ -289,15 +388,15 @@ namespace AmiyaBotMaaAdapter
                         {
 
                             //如果队列是空的，默认添加一个唤醒
-                            //if (_taskQueue.Count == 0)
-                            //{
-                            //    var maa = new MaaTask();
-                            //    maa.Type = "StartUp";
-                            //    maa.Parameter = "{\"start_game_enabled\":\"true\"}";
-                            //    maa.Uuid = "";
+                            if (_taskQueue.Count == 0)
+                            {
+                                var maa = new MaaTask();
+                                maa.Type = "StartUp";
+                                maa.Parameter = "{\"start_game_enabled\":\"true\"}";
+                                maa.Uuid = "";
 
-                            //    _taskQueue.Enqueue(maa);
-                            //}
+                                _taskQueue.Enqueue(maa);
+                            }
 
                             foreach (var maaTask in taskToEnqueue)
                             {
@@ -337,7 +436,11 @@ namespace AmiyaBotMaaAdapter
 
             if ((bool)dictResponse["success"] == false)
             {
-                return dictResponse["reason"]?.ToString();
+                if (dictResponse.ContainsKey("reason"))
+                {
+                    return dictResponse["reason"]?.ToString();
+                }
+                return "未知错误";
             }
 
             data = dictResponse;

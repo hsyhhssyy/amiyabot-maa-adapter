@@ -42,7 +42,9 @@ namespace AmiyaBotMaaAdapter
             {
                 Formatting = Formatting.None
             });
-            
+
+            txtResources.Text = MaaAdapter.CurrentAdapter.Resources;
+
             MaaAdapter.CurrentAdapter.StartListen();
         }
 
@@ -88,5 +90,9 @@ namespace AmiyaBotMaaAdapter
         }
 
 
+        private void TxtResources_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            MaaAdapter.CurrentAdapter.Resources = txtResources.Text;
+        }
     }
 }

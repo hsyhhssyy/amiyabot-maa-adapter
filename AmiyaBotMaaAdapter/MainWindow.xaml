@@ -30,7 +30,7 @@
                     <RowDefinition Height="29*"/>
                 </Grid.RowDefinitions>
                 <TextBlock Text="你需要一个已经配置好的MAA，确定能用它连接模拟器并配置好了各项功能。至少配置好一键长草并确定可以执行。然后将MAA所在文件夹填入下面的文本框。(如果MAA需要管理员启动，则本程序也要管理员启动。)" TextWrapping="Wrap"/>
-                <TextBox Grid.Row="1" Margin="10,5,10,5"/>
+                <TextBox Name="txtResources" Grid.Row="1" Margin="10,5,10,5" TextChanged="TxtResources_OnTextChanged"/>
             </Grid>
         </GroupBox>
         <GroupBox Grid.Row="0" Grid.Column="1" Header="第二步：" Style="{StaticResource GroupBoxMargin}">
