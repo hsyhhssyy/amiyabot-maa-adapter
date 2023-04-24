@@ -1,6 +1,5 @@
 ﻿using AmiyaBotMaaAdapter.Helpers;
 using AmiyaBotMaaAdapter.Interop;
-using HandyControl.Controls;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -10,6 +9,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using static AmiyaBotMaaAdapter.Interop.AsstInterop;
 
 namespace AmiyaBotMaaAdapter

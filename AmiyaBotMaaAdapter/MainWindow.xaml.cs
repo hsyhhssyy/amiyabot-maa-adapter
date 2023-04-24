@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,9 +12,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using AmiyaBotMaaAdapter.Helpers;
 using AmiyaBotMaaAdapter.Interop;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 
 namespace AmiyaBotMaaAdapter
@@ -55,14 +56,18 @@ namespace AmiyaBotMaaAdapter
                 txtLogs.Text += $"[{e.DateTime:s}][{e.Level,-10}]{e.Message}" + Environment.NewLine;
             });
         }
-
-        private void callback(int msg, string details_json, IntPtr custom_arg)
-        {
-            
-        }
-
+        
         private void BtnGenerateSignature_Click(object sender, RoutedEventArgs e)
         {
+            if (!String.IsNullOrWhiteSpace(MaaAdapter.CurrentAdapter.Signature))
+            {
+                if (MessageBox.Show("生成新的密钥会使旧的密钥失效，确定要生成新密钥吗？", "生成密钥", MessageBoxButton.YesNo) !=
+                    MessageBoxResult.Yes)
+                {
+                    return;
+                }
+            }
+
             var signature = MaaAdapter.CurrentAdapter.GenerateSignature();
 
             if (signature == null)
@@ -93,6 +98,21 @@ namespace AmiyaBotMaaAdapter
         private void TxtResources_OnTextChanged(object sender, TextChangedEventArgs e)
         {
             MaaAdapter.CurrentAdapter.Resources = txtResources.Text;
+        }
+
+        private void BtnBrowse_OnClick(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog
+            {
+                Filter = "MaaCore.dll|MaaCore.dll"
+            };
+
+            var result = dlg.ShowDialog();
+
+            if (result == true)
+            {
+                txtResources.Text = new FileInfo(dlg.FileName).Directory?.FullName??"";
+            }
         }
     }
 }

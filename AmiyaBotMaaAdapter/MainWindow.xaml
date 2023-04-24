@@ -5,10 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Loaded="MainWindow_OnLoaded"
-        Title="MainWindow" Height="450" Width="800">
+        Title="信息终端" Height="600" Width="900">
     <Window.Resources>
         <Style TargetType="GroupBox" x:Key="GroupBoxMargin">
             <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style TargetType="TextBox" x:Key="TextBoxMargin">
+            <Setter Property="Margin" Value="0,5,0,5"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
             <Setter Property="FontSize" Value="14"/>
         </Style>
     </Window.Resources>
@@ -26,22 +31,28 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="29*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <TextBlock Text="你需要一个已经配置好的MAA，确定能用它连接模拟器并配置好了各项功能。至少配置好一键长草并确定可以执行。然后将MAA所在文件夹填入下面的文本框。(如果MAA需要管理员启动，则本程序也要管理员启动。)" TextWrapping="Wrap"/>
-                <TextBox Name="txtResources" Grid.Row="1" Margin="10,5,10,5" TextChanged="TxtResources_OnTextChanged"/>
+                <Image Grid.Row="1" />
+                <TextBlock Text="MAA路径:" Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0"/>
+                <Button Content="浏览..." Grid.Row="2" HorizontalAlignment="Right" Width="50" Click="BtnBrowse_OnClick"/>
+                <TextBox Name="txtResources" Grid.Row="3" Style="{StaticResource TextBoxMargin}" TextChanged="TxtResources_OnTextChanged"/>
             </Grid>
         </GroupBox>
         <GroupBox Grid.Row="0" Grid.Column="1" Header="第二步：" Style="{StaticResource GroupBoxMargin}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="29*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <TextBlock Text="联系兔兔的管理员，管他要连接地址，填到下面的文本框里，或者如果管理员配置了兔兔，在群聊中说“兔兔查看MAA连接地址”也可以。" TextWrapping="Wrap"/>
-                <TextBox Name="txtServer" TextChanged="TxtServer_TextChanged" Grid.Row="1" Margin="10,5,10,5"/>
+                <TextBlock Text="兔兔连接地址:" Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0"/>
+                <TextBox Name="txtServer" TextChanged="TxtServer_TextChanged" Grid.Row="3" Style="{StaticResource TextBoxMargin}"/>
             </Grid>
         </GroupBox>
         <GroupBox Grid.Row="1" Grid.Column="0" Header="第三步：" Style="{StaticResource GroupBoxMargin}">
@@ -49,14 +60,14 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
                 <TextBlock Text="按下生成密钥按钮，然后复制下面文本框里的密钥，然后到群里，说“兔兔记录MAA密钥&lt;密钥内容&gt;”让兔兔记住密钥。不必担心其他人看到密钥，他们就算复制了这个密钥也没用。" TextWrapping="Wrap" Grid.ColumnSpan="2" Margin="0,0,0,0"/>
-                <TextBox Name="txtSignature" Grid.Row="1" Grid.Column="0" Margin="10,5,5,5" TextWrapping="Wrap" IsReadOnly="True"/>
-                <Button Grid.Row="1" Grid.Column="1" Margin="5,5,10,5" Content="生成密钥" Click="BtnGenerateSignature_Click"/>
+
+                <TextBlock Text="远控密钥:" Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0"/>
+                <Button Content="生成密钥" Grid.Row="2" HorizontalAlignment="Right" Width="100" Click="BtnGenerateSignature_Click"/>
+                <TextBox Name="txtSignature" Grid.Row="3" Grid.Column="0" TextWrapping="Wrap" IsReadOnly="True" Style="{StaticResource TextBoxMargin}"/>
             </Grid>
         </GroupBox>
         <GroupBox Grid.Row="1" Grid.Column="1" Header="第四步：" Style="{StaticResource GroupBoxMargin}">
@@ -69,7 +80,7 @@
             </Grid>
         </GroupBox>
         <GroupBox Grid.Row="0" Grid.Column="2" Header="运行日志" Grid.RowSpan="2" Style="{StaticResource GroupBoxMargin}">
-            <TextBox Name="txtLogs" TextWrapping="Wrap" AcceptsReturn="True" IsReadOnly="True" FontSize="12" />
+            <TextBox Name="txtLogs" FontFamily="Courier New" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" IsReadOnly="True" FontSize="12" />
         </GroupBox>
     </Grid>
 </Window>
