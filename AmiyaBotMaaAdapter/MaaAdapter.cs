@@ -237,6 +237,8 @@ namespace AmiyaBotMaaAdapter
 
         private void UploadGuiJson()
         {
+            Logger.Current.Info("正在上传GuiJson");
+
             var guiPath = Path.Combine(_resources, "config/gui.json");
 
             var error = GetResponseData(HttpHelper.PostAction(_server + "/maa/guiJson", JsonConvert.SerializeObject(new Dictionary<string, string>()
@@ -249,6 +251,10 @@ namespace AmiyaBotMaaAdapter
             if (error != null)
             {
                 Logger.Current.Report("上传GuiJson发生错误:" + error);
+            }
+            else
+            {
+                Logger.Current.Info("上传GuiJson完成");
             }
         }
 
@@ -270,33 +276,23 @@ namespace AmiyaBotMaaAdapter
                 MaaTask item;
                 if (_taskQueue.TryDequeue(out item))
                 {
-                    bool executeSuccess = false;
-                    String payload = "";
-                    try
+                    switch (item.Type)
                     {
-                        switch (item.Type)
-                        {
-                            case "CaptureImage":
+                        case "CaptureImage":
+                            CaptureImage(item);
+                            break;
+                        default:
+                            bool executeSuccess = false;
+                            String payload = "";
+                            try
                             {
-                                ulong buffSize = 1024 * 1024 * 50;
-                                IntPtr buff = Marshal.AllocHGlobal((int)buffSize);
-                                var actualSize = AsstInterop.AsstGetImage(_handle, buff, buffSize);
 
-                                var managedBuff = new byte[actualSize];
-                                Marshal.Copy(buff,managedBuff,0,(int)actualSize);
-                                Marshal.FreeHGlobal(buff);
-
-                                payload = Convert.ToBase64String(managedBuff);
-                                
-                                break;
-                            }
-                            default:
                                 // 执行某个操作
                                 AsstInterop.AsstAppendTask(_handle, item.Type, item.Parameter);
                                 Logger.Current.Info($"开始执行任务{item.Type}({item.Uuid})。");
                                 AsstInterop.AsstStart(_handle);
-                                while (AsstInterop.AsstRunning(_handle)!=0
-                                       && (AsstLastCallback!= 10002 && AsstLastCallback!=3))
+                                while (AsstInterop.AsstRunning(_handle) != 0
+                                       && (AsstLastCallback != 10002 && AsstLastCallback != 3))
                                 {
                                     Thread.Sleep(1000);
                                 }
@@ -305,31 +301,38 @@ namespace AmiyaBotMaaAdapter
                                 {
                                     AsstInterop.AsstStop(_handle);
                                 }
+
                                 executeSuccess = true;
                                 Logger.Current.Report("任务执行成功");
-                                break;
-                        }
-                    }
-                    catch (Exception exp)
-                    {
-                        Logger.Current.Critical(Logger.Current.FormatException(exp, ""));
-                    }
-                    finally
-                    {
-                        //汇报任务进度
-                        var error = GetResponseData(HttpHelper.PostAction(_server + "/maa/reportStatus", JsonConvert.SerializeObject(new Dictionary<string, string>()
-                        {
-                            { "uuid", _uuid },
-                            { "signature", _signature  },
-                            { "status", executeSuccess?"COMPLETE":"FAIL"  },
-                            { "task", item.Uuid  },
-                            { "payload", payload  },
-                        })), out var getTaskResponse);
+                            }
+                            catch (Exception exp)
+                            {
+                                Logger.Current.Critical(Logger.Current.FormatException(exp, ""));
+                            }
+                            finally
+                            {
+                                if (!string.IsNullOrWhiteSpace(item.Uuid))
+                                {
+                                    //汇报任务进度
+                                    var error = GetResponseData(HttpHelper.PostAction(_server + "/maa/reportStatus",
+                                        JsonConvert.SerializeObject(new Dictionary<string, string>()
+                                        {
+                                            { "uuid", _uuid },
+                                            { "signature", _signature },
+                                            { "status", executeSuccess ? "COMPLETE" : "FAIL" },
+                                            { "task", item.Uuid },
+                                            { "payload", payload },
+                                        })), out var getTaskResponse);
 
-                        if (error != null)
-                        {
-                            Logger.Current.Report("汇报结果时发生错误:" + error);
-                        }
+                                    if (error != null)
+                                    {
+                                        Logger.Current.Report("汇报结果时发生错误:" + error);
+                                    }
+
+                                }
+                            }
+
+                            break;
                     }
                 }
             }
@@ -340,7 +343,7 @@ namespace AmiyaBotMaaAdapter
         {
             while (true)
             {
-                Thread.Sleep(30*1000);
+                Thread.Sleep(15*1000);
                 if (!_listening)
                 {
                     continue;
@@ -400,7 +403,17 @@ namespace AmiyaBotMaaAdapter
 
                             foreach (var maaTask in taskToEnqueue)
                             {
-                                _taskQueue.Enqueue(maaTask);
+                                switch (maaTask.Type)
+                                {
+                                    case "CaptureImageNow":
+                                    {
+                                        CaptureImage(maaTask);
+                                        break;
+                                    }
+                                    default:
+                                        _taskQueue.Enqueue(maaTask);
+                                        break;
+                                }
                             }
 
                             Logger.Current.Info("联网获取了" + tasks.Count + "个任务。");
@@ -409,6 +422,38 @@ namespace AmiyaBotMaaAdapter
                 }
             }
             // ReSharper disable once FunctionNeverReturns
+        }
+
+        private void CaptureImage(MaaTask maaTask)
+        {
+            Logger.Current.Info("插入截图任务");
+            ulong buffSize = 1024 * 1024 * 50;
+            IntPtr buff = Marshal.AllocHGlobal((int)buffSize);
+            var actualSize = AsstInterop.AsstGetImage(_handle, buff, buffSize);
+
+            var managedBuff = new byte[actualSize];
+            Marshal.Copy(buff, managedBuff, 0, (int)actualSize);
+            Marshal.FreeHGlobal(buff);
+
+            var payload = Convert.ToBase64String(managedBuff);
+
+            Logger.Current.Info("截图任务执行完成");
+
+            //汇报任务进度
+            var error = GetResponseData(HttpHelper.PostAction(_server + "/maa/reportStatus",
+                JsonConvert.SerializeObject(new Dictionary<string, string>()
+                {
+                    { "uuid", _uuid },
+                    { "signature", _signature },
+                    { "status", "COMPLETE" },
+                    { "task", maaTask.Uuid },
+                    { "payload", payload },
+                })), out var _);
+
+            if (error != null)
+            {
+                Logger.Current.Report("汇报结果时发生错误:" + error);
+            }
         }
 
         private String GetResponseData(HttpHelper.DeserializedHttpResponse rawResponse,out Dictionary<String,Object> data)
