@@ -10,7 +10,9 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Shapes;
 using static AmiyaBotMaaAdapter.Interop.AsstInterop;
+using Path = System.IO.Path;
 
 namespace AmiyaBotMaaAdapter
 {
@@ -201,6 +203,8 @@ namespace AmiyaBotMaaAdapter
                 }
 
                 Logger.Current.Info("正在连接模拟器.....");
+
+                System.IO.Directory.SetCurrentDirectory(_resources);
 
                 //打开Gui.json
                 var guiPath = Path.Combine(_resources, "config/gui.json");

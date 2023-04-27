@@ -15,7 +15,7 @@ namespace AmiyaBotMaaAdapter.Interop
 
     public static class AsstInterop
     {
-        public const string AsstPortDll = "E:\\Tools\\MAA\\MaaCore.dll";
+        public const string AsstPortDll = "MaaCore.dll";
 
         [DllImport(AsstPortDll)]
         public static extern byte AsstSetUserDir(string path);
@@ -39,7 +39,7 @@ namespace AmiyaBotMaaAdapter.Interop
         public static extern byte AsstSetInstanceOption(IntPtr handle, int key, string value);
 
         [DllImport(AsstPortDll)]
-        public static extern bool AsstConnect(IntPtr handle, string adb_path, string address, string config);
+        public static extern bool AsstConnect(IntPtr handle, string adbPath, string address, string config);
 
         [DllImport(AsstPortDll)]
         public static extern int AsstAppendTask(IntPtr handle, string type, string parameters);
