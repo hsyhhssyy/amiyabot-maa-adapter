@@ -283,12 +283,46 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ConfigPages\ConfigPageChildren\MaaConfigPageADBTab.xaml.cs">
+      <DependentUpon>MaaConfigPageADBTab.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ConfigPages\ConfigPageChildren\MaaConfigPageFightTab.xaml.cs">
+      <DependentUpon>MaaConfigPageFightTab.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ConfigPages\ConnectAmiyaBotConfigPage.xaml.cs">
+      <DependentUpon>ConnectAmiyaBotConfigPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ConfigPages\ConnectMAAConfigPage.xaml.cs">
+      <DependentUpon>ConnectMAAConfigPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\CollectionExtensions.cs" />
+    <Compile Include="MaaAdapterConfig.cs" />
+    <Compile Include="MaaAdapterHttpHelper.cs" />
+    <Compile Include="ConfigPages\MaaConfigPage.xaml.cs">
+      <DependentUpon>MaaConfigPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WizardStyleMainWindow.xaml.cs">
       <DependentUpon>WizardStyleMainWindow.xaml</DependentUpon>
     </Compile>
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="ConfigPages\ConfigPageChildren\MaaConfigPageADBTab.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ConfigPages\ConfigPageChildren\MaaConfigPageFightTab.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ConfigPages\ConnectAmiyaBotConfigPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ConfigPages\ConnectMAAConfigPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ConfigPages\MaaConfigPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
@@ -299,10 +333,6 @@
     <Compile Include="Helpers\Logger.cs" />
     <Compile Include="Interop\AstInterop.cs" />
     <Compile Include="MaaAdapter.cs" />
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Page Include="WizardStyleMainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -350,6 +380,7 @@
   <ItemGroup>
     <Resource Include="pallas.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.6.7.0\build\Fody.targets" Condition="Exists('..\packages\Fody.6.7.0\build\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

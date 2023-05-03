@@ -5,244 +5,165 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:amiyaBotMaaAdapter="clr-namespace:AmiyaBotMaaAdapter"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
-        TextElement.FontSize="13"
+        TextElement.FontSize="20"
         TextOptions.TextFormattingMode="Ideal" 
-        TextOptions.TextRenderingMode="Auto"        
+        TextOptions.TextRenderingMode="Auto"   
+        xmlns:local="clr-namespace:AmiyaBotMaaAdapter"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
-        Title="WizardStyleMainWindow" Height="450" Width="800">
+        x:Name="windMain"
+        Title="WizardStyleMainWindow" Height="600" MinWidth="600">
     <Window.Resources>
+        <Style x:Key="HorizontalDividerBorder" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
+            <Setter Property="Height" Value="1" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+        </Style>
+
+        <Style x:Key="VerticalDividerBorder"
+               TargetType="{x:Type Border}"
+               BasedOn="{StaticResource HorizontalDividerBorder}">
+            <Setter Property="Height" Value="Auto" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="Width" Value="1" />
+        </Style>
     </Window.Resources>
-    <StackPanel Orientation="Vertical">
-        <materialDesign:Flipper VerticalAlignment="Top"
-                                Style="{StaticResource MaterialDesignCardFlipper}">
-            <materialDesign:Flipper.FrontContent>
-                <Button Width="192"
-                        Margin="8"
-                        Command="{x:Static materialDesign:Flipper.FlipCommand}"
-                        Content="RESIZING..."
-                        Style="{StaticResource MaterialDesignFlatButton}" />
-            </materialDesign:Flipper.FrontContent>
-            <materialDesign:Flipper.BackContent>
-                <Grid Width="200">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <materialDesign:ColorZone
-                        Padding="6"
-                        Mode="SecondaryMid">
-                        <StackPanel
-                            Orientation="Horizontal">
-                            <Button
-                                HorizontalAlignment="Left"
-                                Command="{x:Static materialDesign:Flipper.FlipCommand}"
-                                Style="{StaticResource MaterialDesignToolForegroundButton}">
-                                <materialDesign:PackIcon
-                                    HorizontalAlignment="Right"
-                                    Kind="ArrowLeft" />
-                            </Button>
-                            <TextBlock
-                                Margin="8,0,0,0"
-                                VerticalAlignment="Center"
-                                Text="EDIT USER" />
-                        </StackPanel>
-                    </materialDesign:ColorZone>
-                    <Grid Grid.Row="1"
-                          Width="172"
-                          Margin="0,6,0,0"
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Top">
-                        <TextBox
-                            Margin="0,12,0,0"
-                            materialDesign:HintAssist.Hint="First name"
-                            materialDesign:HintAssist.IsFloating="True"
-                            Text="James" />
-                        <TextBox
-                            Grid.Row="1"
-                            Margin="0,12,0,0"
-                            materialDesign:HintAssist.Hint="Last name"
-                            materialDesign:HintAssist.IsFloating="True"
-                            Text="Willock" />
-                    </Grid>
-                </Grid>
-            </materialDesign:Flipper.BackContent>
-        </materialDesign:Flipper>
-        <materialDesign:Flipper VerticalAlignment="Top"
-                                Style="{StaticResource MaterialDesignCardFlipper}">
-            <materialDesign:Flipper.FrontContent>
-                <Grid Width="200"
-                       Height="100">
-                    <Button Width="192"
-                            Height="60"
-                            Margin="8"
+
+    <materialDesign:DrawerHost x:Name="DrawerHost"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Stretch"
+                               BorderBrush="{DynamicResource MaterialDesignDivider}"
+                               BorderThickness="2"
+                               BottomDrawerBackground="{DynamicResource SecondaryHueLightBrush}"
+                               BottomDrawerCornerRadius="20 20 0 0">
+
+        <materialDesign:DrawerHost.Style>
+            <Style TargetType="materialDesign:DrawerHost" BasedOn="{StaticResource {x:Type materialDesign:DrawerHost}}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsChecked, ElementName=BackgroundToggle}" Value="True">
+                        <Setter Property="OverlayBackground" Value="{DynamicResource PrimaryHueMidBrush}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </materialDesign:DrawerHost.Style>
+        <materialDesign:DrawerHost.RightDrawerContent>
+            <TextBox Name="txtLogs" FontSize="12" MaxWidth="1000" Width="500"
+                     VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10,10,10,10"
+                     materialDesign:HintAssist.Hint="日志" AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Visible" TextWrapping="Wrap"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}">
+            </TextBox>
+        </materialDesign:DrawerHost.RightDrawerContent>
+        <Grid>
+        <Grid.ColumnDefinitions >
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <ScrollViewer VerticalScrollBarVisibility="Visible">
+        <StackPanel Orientation="Vertical">
+            <Expander HorizontalAlignment="Stretch">
+                <Expander.Header>
+                    <Button HorizontalContentAlignment="Stretch" Height="60" Opacity="1"
                             Command="{x:Static materialDesign:Flipper.FlipCommand}"
-                            Content="RESIZING..."
-                            Style="{StaticResource MaterialDesignFlatButton}" />
-                </Grid>
-            </materialDesign:Flipper.FrontContent>
-            <materialDesign:Flipper.BackContent>
-                <Grid Width="200"
-                      Height="256">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <materialDesign:ColorZone
-                        Padding="6"
-                        Mode="SecondaryMid">
-                        <StackPanel
-                            Orientation="Horizontal">
-                            <Button
-                                HorizontalAlignment="Left"
-                                Command="{x:Static materialDesign:Flipper.FlipCommand}"
-                                Style="{StaticResource MaterialDesignToolForegroundButton}">
-                                <materialDesign:PackIcon
-                                    HorizontalAlignment="Right"
-                                    Kind="ArrowLeft" />
-                            </Button>
-                            <TextBlock
-                                Margin="8,0,0,0"
-                                VerticalAlignment="Center"
-                                Text="EDIT USER" />
-                        </StackPanel>
-                    </materialDesign:ColorZone>
-                    <Grid Grid.Row="1"
-                          Width="172"
-                          Margin="0,6,0,0"
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Top">
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <TextBox
-                            Margin="0,12,0,0"
-                            materialDesign:HintAssist.Hint="First name"
-                            materialDesign:HintAssist.IsFloating="True"
-                            Text="James" />
-                        <TextBox
-                            Grid.Row="1"
-                            Margin="0,12,0,0"
-                            materialDesign:HintAssist.Hint="Last name"
-                            materialDesign:HintAssist.IsFloating="True"
-                            Text="Willock" />
-                        <StackPanel
-                            Grid.Row="2"
-                            Margin="0,12,0,0"
-                            HorizontalAlignment="Right"
-                            Orientation="Horizontal">
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Text="Email Contact" />
-                            <ToggleButton
-                                Margin="8,0,0,0" />
-                        </StackPanel>
-                        <StackPanel
-                            Grid.Row="3"
-                            Margin="0,12,0,0"
-                            HorizontalAlignment="Right"
-                            Orientation="Horizontal">
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Text="Telephone Contact" />
-                            <ToggleButton
-                                Margin="8,0,0,0" />
-                        </StackPanel>
-                    </Grid>
-                </Grid>
-            </materialDesign:Flipper.BackContent>
-        </materialDesign:Flipper>
-        <materialDesign:Flipper VerticalAlignment="Top"
-                                Style="{StaticResource MaterialDesignCardFlipper}">
-            <materialDesign:Flipper.FrontContent>
-                <Grid Width="200"
-                       Height="100">
-                    <Button Width="192"
-                            Height="60"
-                            Margin="8"
+                            Style="{StaticResource MaterialDesignOutlinedLightButton}">
+                        <Grid>
+                            <Grid.ColumnDefinitions >
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                <materialDesign:PackIcon VerticalAlignment="Center" Width="40" Height="40"
+                                                     Kind="NumericOneCircle" HorizontalAlignment="Stretch"/>
+                                <TextBlock
+                                Margin="5,0,0,0"
+                                VerticalAlignment="Center" FontSize="20"
+                                Text="第一步：连接MAA" />
+                            </StackPanel>
+                            <materialDesign:PackIcon x:Name="icoConnectMAA"
+                                Grid.Column="1" VerticalAlignment="Center"
+                                                     Kind="Error" Foreground="Red" Width="40" Height="40" Margin="0,0,10,0"/>
+                        </Grid>
+                    </Button>
+                </Expander.Header>
+                <amiyaBotMaaAdapter:ConnectMAAConfigPage x:Name="usrConnectMAAConfigPage" Margin="30,0,30,0"/>
+            </Expander>
+            <Expander HorizontalAlignment="Stretch">
+                <Expander.Header>
+                    <Button HorizontalContentAlignment="Stretch" Height="60" Opacity="1"
                             Command="{x:Static materialDesign:Flipper.FlipCommand}"
-                            Content="RESIZING..."
-                            Style="{StaticResource MaterialDesignFlatButton}" />
-                </Grid>
-            </materialDesign:Flipper.FrontContent>
-            <materialDesign:Flipper.BackContent>
-                <Grid Width="200"
-                      Height="256">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <materialDesign:ColorZone
-                        Padding="6"
-                        Mode="SecondaryMid">
-                        <StackPanel
-                            Orientation="Horizontal">
-                            <Button
-                                HorizontalAlignment="Left"
-                                Command="{x:Static materialDesign:Flipper.FlipCommand}"
-                                Style="{StaticResource MaterialDesignToolForegroundButton}">
-                                <materialDesign:PackIcon
-                                    HorizontalAlignment="Right"
-                                    Kind="ArrowLeft" />
-                            </Button>
-                            <TextBlock
-                                Margin="8,0,0,0"
-                                VerticalAlignment="Center"
-                                Text="EDIT USER" />
-                        </StackPanel>
-                    </materialDesign:ColorZone>
-                    <Grid Grid.Row="1"
-                          Width="172"
-                          Margin="0,6,0,0"
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Top">
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <TextBox
-                            Margin="0,12,0,0"
-                            materialDesign:HintAssist.Hint="First name"
-                            materialDesign:HintAssist.IsFloating="True"
-                            Text="James" />
-                        <TextBox
-                            Grid.Row="1"
-                            Margin="0,12,0,0"
-                            materialDesign:HintAssist.Hint="Last name"
-                            materialDesign:HintAssist.IsFloating="True"
-                            Text="Willock" />
-                        <StackPanel
-                            Grid.Row="2"
-                            Margin="0,12,0,0"
-                            HorizontalAlignment="Right"
-                            Orientation="Horizontal">
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Text="Email Contact" />
-                            <ToggleButton
-                                Margin="8,0,0,0" />
-                        </StackPanel>
-                        <StackPanel
-                            Grid.Row="3"
-                            Margin="0,12,0,0"
-                            HorizontalAlignment="Right"
-                            Orientation="Horizontal">
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Text="Telephone Contact" />
-                            <ToggleButton
-                                Margin="8,0,0,0" />
-                        </StackPanel>
-                    </Grid>
-                </Grid>
-            </materialDesign:Flipper.BackContent>
-        </materialDesign:Flipper>
-    </StackPanel>
+                            Style="{StaticResource MaterialDesignOutlinedLightButton}">
+                        <Grid>
+                            <Grid.ColumnDefinitions >
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                <materialDesign:PackIcon VerticalAlignment="Center" Width="40" Height="40"
+                                                         Kind="NumericOneCircle" HorizontalAlignment="Stretch"/>
+                                <TextBlock
+                                    Margin="5,0,0,0"
+                                    VerticalAlignment="Center" FontSize="20"
+                                    Text="第二步：连接兔兔" />
+                            </StackPanel>
+                            <materialDesign:PackIcon x:Name="icoConnectAmiyaBot"
+                                                     Grid.Column="1" VerticalAlignment="Center"
+                                                     Kind="Error" Foreground="Red" Width="40" Height="40" Margin="0,0,10,0"/>
+                        </Grid>
+                    </Button>
+                </Expander.Header>
+                <amiyaBotMaaAdapter:ConnectAmiyaBotConfigPage x:Name="usrConnectAmiyaBot" Margin="30,0,30,0"/>
+            </Expander>
+            <Expander HorizontalAlignment="Stretch">
+                <Expander.Header>
+                    <Button HorizontalContentAlignment="Stretch" Height="60" Opacity="1"
+                            Command="{x:Static materialDesign:Flipper.FlipCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedLightButton}">
+                        <Grid>
+                            <Grid.ColumnDefinitions >
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                <materialDesign:PackIcon VerticalAlignment="Center" Width="40" Height="40"
+                                                         Kind="NumericOneCircle" HorizontalAlignment="Stretch"/>
+                                <TextBlock
+                                    Margin="5,0,0,0"
+                                    VerticalAlignment="Center" FontSize="20"
+                                    Text="第三步：配置MAA" />
+                            </StackPanel>
+                            <materialDesign:PackIcon x:Name="icoMaaConfig"
+                                                     Grid.Column="1" VerticalAlignment="Center"
+                                                     Kind="Error" Foreground="Red" Width="40" Height="40" Margin="0,0,10,0"/>
+                        </Grid>
+                    </Button>
+                </Expander.Header>
+                <amiyaBotMaaAdapter:MaaConfigPage x:Name="usrMaaConfig" Margin="30,0,30,0"/>
+            </Expander>
+        </StackPanel>
+        </ScrollViewer>
+        <Border
+            Grid.Column="1" Style="{StaticResource VerticalDividerBorder}" />
+            <Button Grid.Column="2"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Command="{x:Static materialDesign:DrawerHost.OpenDrawerCommand}"
+                    CommandParameter="{x:Static Dock.Right}"
+            Content="日志"
+            IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+            ToolTip="MaterialDesignFlatLightButton" >
+                <Button.LayoutTransform>
+                    <RotateTransform Angle="90"/>
+                </Button.LayoutTransform>
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatLightButton}">
+                    </Style>
+                </Button.Style>
+            </Button>
+        </Grid>
+    </materialDesign:DrawerHost>
 </Window>
