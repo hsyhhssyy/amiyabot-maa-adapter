@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -62,33 +63,50 @@ namespace AmiyaBotMaaAdapter
 
                 Task.Run(() =>
                 {
-                    try
+                    while (true)
                     {
-                        //TestServer
-                        var error = HttpHelper.PostAction(server + "/maa/login",
-                            JsonConvert.SerializeObject(new Dictionary<string, string>()
-                            {
-                                { "uuid", MaaAdapterConfig.CurrentConfig.Uuid },
-                                { "signature", MaaAdapterConfig.CurrentConfig.Signature }
-                            })).GetResponseData(out _);
-
-                        if (error != null)
+                        try
                         {
-                            Dispatcher.Invoke(() =>
+                            //TestServer
+                            var error = HttpHelper.PostAction(server + "/maa/login",
+                                JsonConvert.SerializeObject(new Dictionary<string, string>()
+                                {
+                                    { "uuid", MaaAdapterConfig.CurrentConfig.Uuid },
+                                    { "signature", MaaAdapterConfig.CurrentConfig.Signature }
+                                })).GetResponseData(out _);
+
+                            if (error == null)
                             {
-                                icoAddressValid.Kind = PackIconKind.Check;
-                                icoAddressValid.Foreground = Brushes.Green;
-                                Validated = true;
-                            });
+                                Dispatcher.Invoke(() =>
+                                {
+                                    icoAddressValid.Kind = PackIconKind.Check;
+                                    icoAddressValid.Foreground = Brushes.Green;
+                                    Validated = true;
+                                });
+
+                                Logger.Current.Info("成功登录到AmiyaBot Server");
+                            }else
+                            {
+                                Logger.Current.Info($"登录AmiyaBot Server失败,错误{error}");
+                            }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        //
-                    }
-                    finally
-                    {
-                        Dispatcher.Invoke(() => { this.IsEnabled = true; });
+                        catch (Exception ex)
+                        {
+                            //
+                        }
+                        finally
+                        {
+                            Dispatcher.Invoke(() => { this.IsEnabled = true; });
+                        }
+
+                        if (Validated)
+                        {
+                            Thread.Sleep(1000*60*10);
+                        }
+                        else
+                        {
+                            Thread.Sleep(1000);
+                        }
                     }
                 });
             }
@@ -139,6 +157,8 @@ namespace AmiyaBotMaaAdapter
                     icoAddressValid.Kind = PackIconKind.Check;
                     icoAddressValid.Foreground = Brushes.Green;
                     Validated = true;
+
+                    Logger.Current.Info($"密钥已更新:{MaaAdapterConfig.CurrentConfig.Signature}");
                 }
             }
             catch (Exception ex)
