@@ -168,6 +168,11 @@ namespace AmiyaBotMaaAdapter
 
         private void SaveConfig()
         {
+            if (String.IsNullOrWhiteSpace(_maaDirectory))
+            {
+                return;
+            }
+
             var cfgDirectory = new DirectoryInfo(Path.Combine(_maaDirectory, "AmiyaBotAdapterData"));
             if (!cfgDirectory.Exists)
             {

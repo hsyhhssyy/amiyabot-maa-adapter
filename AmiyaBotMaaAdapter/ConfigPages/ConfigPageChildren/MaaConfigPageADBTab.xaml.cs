@@ -45,6 +45,12 @@ namespace AmiyaBotMaaAdapter.ConfigPages.ConfigPageChildren
 
             try
             {
+                if (string.IsNullOrWhiteSpace(MaaAdapterConfig.CurrentConfig.MaaDirectory))
+                {
+                    Validated = false;
+                    return;
+                }
+
                 //读取maa的配置,找到所有的mode
                 var maaCfgFile = new FileInfo(Path.Combine(MaaAdapterConfig.CurrentConfig.MaaDirectory,
                     "resource\\config.json"));

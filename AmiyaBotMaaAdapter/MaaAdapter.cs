@@ -70,6 +70,12 @@ namespace AmiyaBotMaaAdapter
 
                     Logger.Current.Info("正在连接模拟器.....");
 
+                    if (string.IsNullOrWhiteSpace(MaaAdapterConfig.CurrentConfig.MaaDirectory))
+                    {
+                        Logger.Current.Report("模拟器连接失败，未找到MAA!");
+                        return;
+                    }
+
                     Directory.SetCurrentDirectory(MaaAdapterConfig.CurrentConfig.MaaDirectory);
 
                     //打开Gui.json
